@@ -1,0 +1,49 @@
+version: '3.9'
+services:
+  application:
+    build: .
+    restart: always
+    environment:
+      POSTGRES_DSN: postgresql://postgres:password@db/postgres
+      POSTGRES_SERVER: db
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      REDIS_HOST: cache
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: eYVX7EwVmmxKPCDmwMtyKVge8oLd2t81
+    depends_on:
+      - db
+      - cache
+    ports:
+      - "8080:8080"
+    networks:
+      - enrollment
+
+  db:
+    image: postgres:15.2-alpine
+    environment:
+      - POSTGRES_PASSWORD=password
+    ports:
+      - "5432:5432"
+    restart: always
+    networks:
+      - enrollment
+
+  cache:
+    image: redis:6.2-alpine
+    restart: always
+    ports:
+      - '6379:6379'
+    command: redis-server --save 20 1 --loglevel warning --requirepass eYVX7EwVmmxKPCDmwMtyKVge8oLd2t81
+    volumes:
+      - cache:/data
+
+volumes:
+  cache:
+    driver: local
+
+networks:
+  enrollment:
+    driver: bridge

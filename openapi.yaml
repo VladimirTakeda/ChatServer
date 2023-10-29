@@ -1,0 +1,164 @@
+openapi: "3.0.2"
+info:
+  title: ChatServer API
+  version: "1.0"
+servers:
+  - url: http://localhost:8000/
+components:
+  schemas:
+    error:
+      type: object
+      properties:
+        detail:
+          description: error message
+          type: string
+paths:
+  /account:
+    post:
+      description: creates a new account
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                login:
+                  description: user login
+                  type: string
+                password:
+                  description: user password
+                  type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          description: invalid input parameters
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
+  /auth:
+    post:
+      description: auths user by login and password
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                login:
+                  description: user login
+                  type: string
+                password:
+                  description: user password
+                  type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Token:
+                    type: string
+                example:
+                  Token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+
+        '400':
+          description: invalid input parameters
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
+
+  /create_chat:
+    post:
+      description: creates a chat between two users
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                from_user:
+                  description: user id
+                  type: int
+                to_user:
+                  description: user id
+                  type: int
+              example:
+                from_user: 10
+                to_user: 20
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ChatId:
+                    type: int
+                example:
+                  Token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+
+        '400':
+          description: invalid input parameters
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
+
+  /get_users_by_prefix:
+    post:
+      description: return list of users by prefix in username exclude this user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                search_prefix:
+                  description: user prefix
+                  type: string
+                this_user_is:
+                  description: current user id
+                  type: int
+              example:
+                user_prefix: vov
+                this_user: vovatakeda
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                    type: object
+                    properties:
+                      nickname:
+                        type: string
+                      user_id:
+                        type: int
+                example:
+                  - nickname: argen
+                    user_id: 18
+                  - nickname: shansolo
+                    user_id: 1003
+
+        '400':
+          description: invalid input parameters
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
