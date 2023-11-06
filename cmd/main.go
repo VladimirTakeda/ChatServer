@@ -74,7 +74,7 @@ func main() {
 	services := service.NewService(repos)
 
 	httpHandlers := http.NewHandler(services)
-	serverHub := websocket2.NewServerHub()
+	serverHub := websocket2.NewServerHub(services)
 	wsHandlers := ws.NewHandler(serverHub)
 	go serverHub.Run()
 

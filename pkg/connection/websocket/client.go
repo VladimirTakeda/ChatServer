@@ -3,18 +3,19 @@ package websocket
 import (
 	"github.com/gorilla/websocket"
 	"log"
+	"time"
 )
 
 type Client struct {
 	Conn    *websocket.Conn
-	Message chan WsMessage
+	Message chan WsMessageOut
 	ID      int
 }
 
 func NewClient(conn *websocket.Conn, id int) *Client {
 	return &Client{
 		Conn:    conn,
-		Message: make(chan WsMessage, 10),
+		Message: make(chan WsMessageOut, 10),
 		ID:      id,
 	}
 }
@@ -37,6 +38,7 @@ func (c *Client) WriteMessage() {
 
 func (c *Client) ReadMessage(hub *ServerHub) {
 	defer func() {
+		log.Printf("unregister")
 		hub.Unregister <- c
 		c.Conn.Close()
 	}()
@@ -62,7 +64,14 @@ func (c *Client) ReadMessage(hub *ServerHub) {
 }
 
 type WsMessage struct {
-	Content  string `json:"content"`
-	UserFrom int    `json:"user_from_id"`
-	UserTo   int    `json:"user_to_id"`
+	Content      string `json:"content"`
+	UserNameFrom string `json:"user_name_from"`
+	UserFrom     int    `json:"user_from_id"`
+	UserTo       int    `json:"user_to_id"`
+}
+
+type WsMessageOut struct {
+	WsMessage
+	IsMine bool      `json:"is_my_message"`
+	Time   time.Time `json:"time"`
 }
