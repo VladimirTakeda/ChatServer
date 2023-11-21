@@ -1,16 +1,16 @@
 package service
 
 import (
-	"ChatServer/pkg/repository"
+	"ChatServer/pkg/repository/postgres"
 	"ChatServer/pkg/types"
 	"context"
 )
 
 type InfoService struct {
-	repo repository.Info
+	repo postgres.Info
 }
 
-func NewInfoService(repo repository.Info) *InfoService {
+func NewInfoService(repo postgres.Info) *InfoService {
 	return &InfoService{repo: repo}
 }
 

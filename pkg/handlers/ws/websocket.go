@@ -17,26 +17,39 @@ var upgrader = websocket.Upgrader{
 	},
 }
 
-func (h *Handler) WebSocketCreate(c *gin.Context) {
-	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
+func (h *Handler) WebSocketCreate(ctx *gin.Context) {
+	conn, err := upgrader.Upgrade(ctx.Writer, ctx.Request, nil)
 	if err != nil {
 		log.Print("upgrade:", err)
 		return
 	}
 
-	userTo, err := strconv.Atoi(c.Request.URL.Query().Get("user_id"))
+	userTo, err := strconv.Atoi(ctx.Request.URL.Query().Get("user_id"))
 	if err != nil {
 		log.Printf("Error parsing userTo: %v", err)
 		return
 	}
 
-	log.Printf("New User Connection with Id: %v", userTo)
+	deviceId := ctx.Request.URL.Query().Get("device_id")
 
-	client := websocket2.NewClient(conn, userTo)
+	log.Printf("New User Connection with Id: %v and device %s", userTo, deviceId)
+
+	client := websocket2.NewClient(conn, userTo, deviceId)
 	h.server.ClientIds[userTo] = client
 
 	h.server.Register <- client
 
-	go client.WriteMessage()
+	go func() {
+		messages, err := h.server.Services.GetMissedMessages(ctx, userTo, deviceId)
+		if err != nil {
+
+		}
+		client.WriteUpdates(messages)
+		go client.WriteMessage()
+	}()
+
+	// get missed messages
+	// write messed messages to websocket
+
 	client.ReadMessage(h.server)
 }

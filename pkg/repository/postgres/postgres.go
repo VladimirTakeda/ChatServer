@@ -1,16 +1,10 @@
-package repository
+package postgres
 
 import (
 	"context"
 	"fmt"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"time"
-)
-
-const (
-	chatTable             = "chats"
-	userTable             = "users"
-	couriersScheduleTable = "couriers_schedule"
 )
 
 type Config struct {

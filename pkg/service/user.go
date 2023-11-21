@@ -1,15 +1,15 @@
 package service
 
 import (
-	"ChatServer/pkg/repository"
+	"ChatServer/pkg/repository/postgres"
 	"context"
 )
 
 type UserService struct {
-	repo repository.User
+	repo postgres.User
 }
 
-func NewUserService(repo repository.User) *UserService {
+func NewUserService(repo postgres.User) *UserService {
 	return &UserService{repo: repo}
 }
 

@@ -5,7 +5,8 @@ import (
 	websocket2 "ChatServer/pkg/connection/websocket"
 	"ChatServer/pkg/handlers/http"
 	"ChatServer/pkg/handlers/ws"
-	"ChatServer/pkg/repository"
+	"ChatServer/pkg/repository/postgres"
+	redis2 "ChatServer/pkg/repository/redis"
 	"ChatServer/pkg/service"
 	"context"
 	"database/sql"
@@ -41,18 +42,18 @@ func main() {
 		wait.WithBreak(50*time.Millisecond),
 		wait.WithDeadline(15*time.Second),
 		wait.WithDebug(true),
-	).Do([]string{fmt.Sprintf("%s:%s", viper.GetString("db.host"), viper.GetString("db.port"))}) {
+	).Do([]string{fmt.Sprintf("%s:%s", viper.GetString("postgres.host"), viper.GetString("postgres.port"))}) {
 		logrus.Fatalf("db is not available")
 		return
 	}
 
-	pool, err := repository.NewPostgresDb(repository.Config{
-		Host:     viper.GetString("db.host"),
-		Port:     viper.GetString("db.port"),
-		UserName: viper.GetString("db.username"),
+	pool, err := postgres.NewPostgresDb(postgres.Config{
+		Host:     viper.GetString("postgres.host"),
+		Port:     viper.GetString("postgres.port"),
+		UserName: viper.GetString("postgres.username"),
 		Password: os.Getenv("DB_PASSWORD"),
-		DbName:   viper.GetString("db.dbname"),
-		SSLMode:  viper.GetString("db.sslmode"),
+		DbName:   viper.GetString("postgres.dbname"),
+		SSLMode:  viper.GetString("postgres.sslmode"),
 	})
 
 	if err != nil {
@@ -60,7 +61,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	pgURL := fmt.Sprintf("postgres://postgres:%s@%s:%s/postgres?sslmode=disable", os.Getenv("DB_PASSWORD"), viper.GetString("db.host"), viper.GetString("db.port"))
+	pgURL := fmt.Sprintf("postgres://postgres:%s@%s:%s/postgres?sslmode=disable", os.Getenv("DB_PASSWORD"), viper.GetString("postgres.host"), viper.GetString("postgres.port"))
 
 	db, err := sql.Open("postgres", pgURL)
 	if err != nil {
@@ -68,10 +69,25 @@ func main() {
 		os.Exit(1)
 	}
 
-	err = repository.RunMigrations("file://migrations", db)
+	err = postgres.RunMigrations("file://migrations", db)
 
-	repos := repository.NewRepository(pool)
-	services := service.NewService(repos)
+	redis, err := redis2.NewRedisDb(redis2.Config{
+		Host:     viper.GetString("redis.host"),
+		Port:     viper.GetString("redis.port"),
+		UserName: viper.GetString("redis.username"),
+		Password: viper.GetString("redis.password"),
+		DbNumber: viper.GetInt("redis.dbnumber"),
+	})
+
+	if err != nil {
+		logrus.Fatalf("failed to open redis, %s", err.Error())
+		os.Exit(1)
+	}
+
+	repos := postgres.NewRepository(pool)
+	cache := redis2.NewCache(redis)
+
+	services := service.NewService(repos, cache)
 
 	httpHandlers := http.NewHandler(services)
 	serverHub := websocket2.NewServerHub(services)

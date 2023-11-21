@@ -30,6 +30,9 @@ services:
     restart: always
     networks:
       - enrollment
+    volumes:
+      - ./db_logs:/var/lib/postgresql/logs
+    command: postgres -c log_statement=all -c logging_collector=on -c log_directory=/var/lib/postgresql/logs -c log_filename=postgresql.log
 
   cache:
     image: redis:6.2-alpine

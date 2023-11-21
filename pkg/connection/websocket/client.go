@@ -1,22 +1,30 @@
 package websocket
 
 import (
+	"ChatServer/pkg/types"
 	"github.com/gorilla/websocket"
 	"log"
-	"time"
 )
 
 type Client struct {
-	Conn    *websocket.Conn
-	Message chan WsMessageOut
-	ID      int
+	Conn     *websocket.Conn
+	Message  chan types.WsMessageOut
+	userId   int
+	deviceId string
 }
 
-func NewClient(conn *websocket.Conn, id int) *Client {
+func (c *Client) WriteUpdates(messages []types.WsMessageOut) {
+	for _, message := range messages {
+		c.Conn.WriteJSON(message)
+	}
+}
+
+func NewClient(conn *websocket.Conn, id int, deviceId string) *Client {
 	return &Client{
-		Conn:    conn,
-		Message: make(chan WsMessageOut, 10),
-		ID:      id,
+		Conn:     conn,
+		Message:  make(chan types.WsMessageOut, 10),
+		userId:   id,
+		deviceId: deviceId,
 	}
 }
 
@@ -44,7 +52,7 @@ func (c *Client) ReadMessage(hub *ServerHub) {
 	}()
 
 	for {
-		var message WsMessage
+		var message types.WsMessage
 		err := c.Conn.ReadJSON(&message)
 		if err != nil {
 			log.Printf("error: %v", err)
@@ -61,17 +69,4 @@ func (c *Client) ReadMessage(hub *ServerHub) {
 
 		hub.Broadcast <- message
 	}
-}
-
-type WsMessage struct {
-	Content      string `json:"content"`
-	UserNameFrom string `json:"user_name_from"`
-	UserFrom     int    `json:"user_from_id"`
-	UserTo       int    `json:"user_to_id"`
-}
-
-type WsMessageOut struct {
-	WsMessage
-	IsMine bool      `json:"is_my_message"`
-	Time   time.Time `json:"time"`
 }

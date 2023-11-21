@@ -1,4 +1,4 @@
-package repository
+package internal
 
 import (
 	"ChatServer/pkg/types"
@@ -18,7 +18,7 @@ func NewInfoPostgres(db *pgxpool.Pool) *InfoPostgres {
 
 func (r *InfoPostgres) GetUsersByPrefix(ctx context.Context, prefix string) (types.UsersList, error) {
 	//TODO add index for login
-	createItemQuery := fmt.Sprintf("SELECT id, login FROM %s	WHERE login LIKE $1", userTable)
+	createItemQuery := fmt.Sprintf("SELECT id, login FROM %s	WHERE login LIKE $1", UserTable)
 
 	rows, err := r.db.Query(ctx, createItemQuery, prefix+"%")
 	if err != nil {

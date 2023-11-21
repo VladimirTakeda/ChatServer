@@ -3,7 +3,8 @@ CREATE TABLE IF NOT EXISTS message
     id      serial       primary key,
     createdTime  timestamp    not null,
     fromUserId int not null,
-    ChatId  int not null
+    ChatId  int not null,
+    Text text not null
 );
 
 CREATE TABLE IF NOT EXISTS user_last_seen
@@ -34,3 +35,13 @@ CREATE TABLE IF NOT EXISTS users
     login    varchar(50)      not null,
     ChatIds  integer[]
 );
+
+CREATE TABLE IF NOT EXISTS devices
+(
+    id      serial       primary key,
+    deviceId    text      not null,
+    userId  integer not null,
+    lastSeen  timestamp
+);
+
+CREATE EXTENSION IF NOT EXISTS pg_stat_statements;

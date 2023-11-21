@@ -1,4 +1,4 @@
-package repository
+package internal
 
 import (
 	"context"
@@ -23,7 +23,7 @@ func (r *UserPostgres) Register(ctx context.Context, nickname string) (*int, err
 	}
 
 	var userId int
-	createItemQuery := fmt.Sprintf("INSERT INTO %s (login) values ($1) RETURNING id", userTable)
+	createItemQuery := fmt.Sprintf("INSERT INTO %s (login) values ($1) RETURNING id", UserTable)
 
 	row := tx.QueryRow(ctx, createItemQuery, nickname)
 	err = row.Scan(&userId)
