@@ -31,3 +31,7 @@ Main service features:
 9) ~~When user registered he sends device info, server generates hash from info and sends to client.
 After that client sends given deviceID with websocket session.~~
 10) Enable group chats (in progress)
+
+# Demo
+
+[![Demostration](https://img.youtube.com/vi/RP0IzubNi5w/0.jpg)](https://www.youtube.com/watch?v=RP0IzubNi5w)
