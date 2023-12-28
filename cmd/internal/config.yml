@@ -2,7 +2,7 @@ port: "8080"
 
 postgres:
   username: "postgres"
-  host: "localhost"
+  host: "db"
   port: "5432"
   dbname: "postgres"
   sslmode: "disable"
@@ -10,6 +10,6 @@ postgres:
 redis:
   username: "default"
   password: "eYVX7EwVmmxKPCDmwMtyKVge8oLd2t81"
-  host: "localhost"
+  host: "cache"
   port: "6379"
   dbnumber: 0
