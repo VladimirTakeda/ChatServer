@@ -39,7 +39,7 @@ func main() {
 	if !wait.New(
 		wait.WithProto("tcp"),
 		wait.WithWait(200*time.Millisecond),
-		wait.WithBreak(50*time.Millisecond),
+		wait.WithBreak(1000*time.Millisecond),
 		wait.WithDeadline(15*time.Second),
 		wait.WithDebug(true),
 	).Do([]string{fmt.Sprintf("%s:%s", viper.GetString("postgres.host"), viper.GetString("postgres.port"))}) {
