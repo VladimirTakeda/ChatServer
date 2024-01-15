@@ -17,7 +17,6 @@ func NewInfoPostgres(db *pgxpool.Pool) *InfoPostgres {
 }
 
 func (r *InfoPostgres) GetUsersByPrefix(ctx context.Context, prefix string) (types.UsersList, error) {
-	//TODO add index for login
 	createItemQuery := fmt.Sprintf("SELECT id, login FROM %s	WHERE login LIKE $1", UserTable)
 
 	rows, err := r.db.Query(ctx, createItemQuery, prefix+"%")
@@ -25,6 +24,7 @@ func (r *InfoPostgres) GetUsersByPrefix(ctx context.Context, prefix string) (typ
 		logrus.Infof("row.Scan(&userId) %s", err.Error())
 		return types.UsersList{}, err
 	}
+	defer rows.Close()
 
 	var result types.UsersList
 
@@ -32,12 +32,14 @@ func (r *InfoPostgres) GetUsersByPrefix(ctx context.Context, prefix string) (typ
 		userInfo := types.UserInfo{}
 		err := rows.Scan(&userInfo.UserId, &userInfo.Nickname)
 		if err != nil {
+			logrus.Infof("Error scanning row: %s", err.Error())
 			return types.UsersList{}, err
 		}
 		result.Users = append(result.Users, userInfo)
 	}
 
 	if err := rows.Err(); err != nil {
+		logrus.Infof("Error reading rows: %s", err.Error())
 		return types.UsersList{}, err
 	}
 

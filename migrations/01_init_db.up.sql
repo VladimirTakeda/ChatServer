@@ -32,7 +32,7 @@ CREATE TABLE IF NOT EXISTS chats
 CREATE TABLE IF NOT EXISTS users
 (
     id      serial       primary key,
-    login    varchar(50)      not null,
+    login    varchar(50)   UNIQUE   not null,
     ChatIds  integer[]
 );
 
@@ -45,3 +45,7 @@ CREATE TABLE IF NOT EXISTS devices
 );
 
 CREATE EXTENSION IF NOT EXISTS pg_stat_statements;
+
+CREATE EXTENSION IF NOT EXISTS pg_trgm;
+
+CREATE INDEX IF NOT EXISTS idx_users_login ON public.users USING btree (UPPER((login)::text));

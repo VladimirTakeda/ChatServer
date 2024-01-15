@@ -33,11 +33,13 @@ func (r *DevicePostgres) RegisterDevice(ctx context.Context, deviceId string, us
 func (r *DevicePostgres) SaveLastActiveTime(ctx context.Context, userId int, deviceId string, lastTime time.Time) error {
 	createItemQuery := fmt.Sprintf("UPDATE %s SET lastSeen = $1 WHERE deviceId = $2 AND userId = $3;", DevicesTable)
 
-	_, err := r.db.Query(ctx, createItemQuery, lastTime, deviceId, userId)
+	rows, err := r.db.Query(ctx, createItemQuery, lastTime, deviceId, userId)
 	if err != nil {
 		logrus.Infof("Failed to execute query: %s", err.Error())
 		return err
 	}
+	// It's important to keep available connection, rows.Close() 0 closes the current connection
+	defer rows.Close()
 
 	return nil
 }
