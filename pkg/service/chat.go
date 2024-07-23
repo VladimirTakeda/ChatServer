@@ -36,11 +36,15 @@ func (s *ChatService) GetMissedMessages(ctx context.Context, userId int, deviceI
 }
 
 func (s *ChatService) CreateChat(ctx context.Context, users []int) (*int, error) {
+	//TODO check if chat already exist
 	chatId, err := s.chat.CreateChat(ctx, users)
 	if err != nil {
 		return chatId, err
 	}
-	s.cache.SetChatMembers(ctx, *chatId, users)
+	err = s.cache.SetChatMembers(ctx, *chatId, users)
+	if err != nil {
+		return nil, err
+	}
 	return chatId, err
 }
 
@@ -53,7 +57,10 @@ func (s *ChatService) GetChatMembers(ctx context.Context, chatId int) ([]int, er
 	if err != nil {
 		members, err = s.chat.GetChatMembers(ctx, chatId)
 		if err == nil {
-			s.cache.SetChatMembers(ctx, chatId, members)
+			err := s.cache.SetChatMembers(ctx, chatId, members)
+			if err != nil {
+				return nil, err
+			}
 		}
 	}
 	return members, err

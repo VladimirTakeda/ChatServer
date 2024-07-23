@@ -1,10 +1,13 @@
 package service
 
 import (
+	minio2 "ChatServer/pkg/repository/minio"
 	"ChatServer/pkg/repository/postgres"
 	"ChatServer/pkg/repository/redis"
 	"ChatServer/pkg/types"
 	"context"
+	"github.com/minio/minio-go/v7"
+	"io"
 	"time"
 )
 
@@ -30,7 +33,12 @@ type Info interface {
 }
 
 type Message interface {
-	AddMessage(ctx context.Context, fromId, chatId int, text string) error
+	AddMessage(ctx context.Context, fromId, chatId int, text string, attachments []string) error
+}
+
+type FileManager interface {
+	SaveFile(ctx context.Context, fromId, chatId int, file io.Reader, size int64, fileName string) (string, error)
+	LoadFile(ctx context.Context, objName string) (*minio.Object, error)
 }
 
 type Service struct {
@@ -39,14 +47,16 @@ type Service struct {
 	Info
 	Message
 	Device
+	FileManager
 }
 
-func NewService(repos *postgres.Repository, cache *redis.Cache) *Service {
+func NewService(repos *postgres.Repository, cache *redis.Cache, s3Storage *minio2.S3Storage) *Service {
 	return &Service{
-		Chat:    NewChatService(repos.Chat, repos.Device, cache.Chat),
-		User:    NewUserService(repos.User),
-		Info:    NewInfoService(repos.Info),
-		Message: NewMessageService(repos.Message),
-		Device:  NewDeviceService(repos.Device),
+		Chat:        NewChatService(repos.Chat, repos.Device, cache.Chat),
+		User:        NewUserService(repos.User),
+		Info:        NewInfoService(repos.Info),
+		Message:     NewMessageService(repos.Message),
+		Device:      NewDeviceService(repos.Device),
+		FileManager: NewFileManagerService(s3Storage),
 	}
 }

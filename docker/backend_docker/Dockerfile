@@ -11,12 +11,12 @@ RUN apk add postgresql-client
 #COPY pkg/go.mod pkg/go.sum ./
 #RUN go mod download && go mod verify
 
-COPY go.mod ./
+COPY ../../go.mod ./
 
 RUN go mod download
 RUN go mod tidy
 
-COPY ./ ./
+COPY ../.. ./
 RUN go build -v -o chatServer ./cmd/main.go
 
 CMD ["./chatServer"]

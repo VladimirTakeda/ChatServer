@@ -4,7 +4,8 @@ CREATE TABLE IF NOT EXISTS message
     createdTime  timestamp    not null,
     fromUserId int not null,
     ChatId  int not null,
-    Text text not null
+    Text text not null,
+    Attachments  text[]
 );
 
 CREATE TABLE IF NOT EXISTS user_last_seen

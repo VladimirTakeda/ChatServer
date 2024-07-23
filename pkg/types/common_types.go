@@ -27,6 +27,10 @@ type GetUsersByPrefixReq struct {
 	Prefix     string `json:"search_prefix"`
 }
 
+type GetFileReq struct {
+	FileId string `json:"file_id"`
+}
+
 type UserInfo struct {
 	UserId   int    `json:"id"`
 	Nickname string `json:"nickname"`
@@ -36,26 +40,17 @@ type UsersList struct {
 	Users []UserInfo `json:"users"`
 }
 
-type CompleteInfoJson struct {
-	CompleteTime string `json:"complete_time"`
-	CourierId    int    `json:"courier_id"`
-	OrderId      int    `json:"order_id"`
-}
-
-type CompleteInfosJson struct {
-	InfoList []CompleteInfoJson `json:"complete_info"`
-}
-
 type ChatMetaInfo struct {
 	ChatId int       `json:"chat_id"`
 	Time   time.Time `json:"last_message_time"`
 }
 
 type WsMessage struct {
-	Content  string `json:"content"`
-	ChatName string `json:"chat_name"`
-	UserFrom int    `json:"user_from_id"`
-	ChatTo   int    `json:"chat_to_id"`
+	Content     string   `json:"content"`
+	Attachments []string `json:"attachments"`
+	ChatName    string   `json:"chat_name"`
+	UserFrom    int      `json:"user_from_id"`
+	ChatTo      int      `json:"chat_to_id"`
 }
 
 type WsMessageOut struct {

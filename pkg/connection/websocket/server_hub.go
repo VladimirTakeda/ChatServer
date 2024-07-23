@@ -36,7 +36,10 @@ func (h *ServerHub) Run() {
 			h.Clients[client] = true
 		case client := <-h.Unregister:
 			if _, ok := h.Clients[client]; ok {
-				h.Services.SaveLastActiveTime(context.Background(), client.userId, client.deviceId, time.Now())
+				err := h.Services.SaveLastActiveTime(context.Background(), client.userId, client.deviceId, time.Now())
+				if err != nil {
+					return
+				}
 				delete(h.Clients, client)
 				delete(h.ClientIds, client.userId)
 				close(client.Message)
@@ -46,7 +49,7 @@ func (h *ServerHub) Run() {
 			log.Printf("Current message: %s", message.Content)
 			ctx, _ := context.WithTimeout(context.Background(), time.Second*5)
 
-			err := h.Services.AddMessage(ctx, message.UserFrom, message.ChatTo, message.Content)
+			err := h.Services.AddMessage(ctx, message.UserFrom, message.ChatTo, message.Content, message.Attachments)
 			if err != nil {
 				log.Printf("Failed save message: %s", err.Error())
 			}

@@ -17,7 +17,7 @@ type Chat interface {
 }
 
 type Message interface {
-	AddMessage(ctx context.Context, fromId, chatId int, text string) error
+	AddMessage(ctx context.Context, fromId, chatId int, text string, attachments []string) error
 }
 
 type User interface {

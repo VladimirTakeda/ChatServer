@@ -46,4 +46,8 @@ func (h *Handler) SetupRoutes(router *gin.Engine) {
 	}
 
 	router.POST("/get_users_by_prefix", rateLimiter, h.GetUsersByPrefix)
+
+	router.POST("/uploadFile", rateLimiter, h.uploadFile)
+
+	router.POST("/getFile", rateLimiter, h.downloadFile)
 }

@@ -5,6 +5,7 @@ import (
 	websocket2 "ChatServer/pkg/connection/websocket"
 	"ChatServer/pkg/handlers/http"
 	"ChatServer/pkg/handlers/ws"
+	minio2 "ChatServer/pkg/repository/minio"
 	"ChatServer/pkg/repository/postgres"
 	redis2 "ChatServer/pkg/repository/redis"
 	"ChatServer/pkg/service"
@@ -84,10 +85,23 @@ func main() {
 		os.Exit(1)
 	}
 
+	minio, err := minio2.NewMinioClient(minio2.Config{
+		KeyID:     viper.GetString("minio.keyID"),
+		AccessKey: viper.GetString("minio.accessKey"),
+		EndPoint:  viper.GetString("minio.endpoint"),
+	})
+
+	if err != nil {
+		logrus.Fatalf("failed to create minio client, %s", err.Error())
+		os.Exit(1)
+	}
+
+	s3Storage := minio2.NewS3Storage(minio)
+
 	repos := postgres.NewRepository(pool)
 	cache := redis2.NewCache(redis)
 
-	services := service.NewService(repos, cache)
+	services := service.NewService(repos, cache, s3Storage)
 
 	httpHandlers := http.NewHandler(services)
 	serverHub := websocket2.NewServerHub(services)
