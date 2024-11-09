@@ -113,7 +113,7 @@ func (r *ChatPostgres) GetAllChats(ctx context.Context, userId int) ([]int, erro
 
 func (r *ChatPostgres) GetMissedMessagesFromChats(ctx context.Context, userTo int, chatIds []int, lastSeen time.Time) ([]types.WsMessageOut, error) {
 	// SQL запрос с использованием IN оператора и сортировкой
-	query := fmt.Sprintf("SELECT createdTime, fromUserId, text, ChatId FROM %s WHERE ChatId = ANY($1) AND createdTime > $2 ORDER BY ChatId, createdTime",
+	query := fmt.Sprintf("SELECT createdTime, fromUserId, text, ChatId, Attachments FROM %s WHERE ChatId = ANY($1) AND createdTime > $2 ORDER BY ChatId, createdTime",
 		MessageTable)
 
 	rows, err := r.db.Query(ctx, query, chatIds, lastSeen)
@@ -126,7 +126,7 @@ func (r *ChatPostgres) GetMissedMessagesFromChats(ctx context.Context, userTo in
 
 	for rows.Next() {
 		messageInfo := types.WsMessageOut{}
-		err := rows.Scan(&messageInfo.Time, &messageInfo.UserFrom, &messageInfo.Content, &messageInfo.ChatTo)
+		err := rows.Scan(&messageInfo.Time, &messageInfo.UserFrom, &messageInfo.Content, &messageInfo.ChatTo, &messageInfo.Attachments)
 		if err != nil {
 			return nil, err
 		}
