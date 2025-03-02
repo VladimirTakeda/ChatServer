@@ -14,9 +14,13 @@ services:
       REDIS_HOST: cache
       REDIS_PORT: 6379
       REDIS_PASSWORD: eYVX7EwVmmxKPCDmwMtyKVge8oLd2t81
+      REDIS_PUBSUB_HOST: redis_pubsub
+      REDIS_PUBSUB_PORT: 8001
+      REDIS_PUBSUB_PASSWORD: eYVX7EwVmmxKPCDmwMtyKVge8oLd2t81
     depends_on:
       - db
       - cache
+      - redis_pubsub
       - minio-server
     ports:
       - "8080:8080"
@@ -61,8 +65,20 @@ services:
     networks:
       - enrollment
 
+  redis_pubsub:
+    image: redis:6.2-alpine
+    command: redis-server --save 20 1 --loglevel warning --requirepass eYVX7EwVmmxKPCDmwMtyKVge8oLd2t81
+    ports:
+      - "6380:6379"
+    volumes:
+      - redis_pubsub:/data
+    networks:
+      - enrollment
+
 volumes:
   cache:
+    driver: local
+  redis_pubsub:
     driver: local
   minio-data:
 

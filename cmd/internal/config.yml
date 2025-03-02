@@ -8,12 +8,20 @@ postgres:
   dbname: "postgres"
   sslmode: "disable"
 
-redis:
+cache:
   username: "default"
   password: "eYVX7EwVmmxKPCDmwMtyKVge8oLd2t81"
   #host: "cache"
   host: "localhost"
   port: "6379"
+  dbnumber: 0
+
+pubsub:
+  username: "default"
+  password: "eYVX7EwVmmxKPCDmwMtyKVge8oLd2t81"
+  #host: "pubsub"
+  host: "localhost"
+  port: "6380"
   dbnumber: 0
 
 minio:

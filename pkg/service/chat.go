@@ -18,17 +18,17 @@ func NewChatService(chatRepo postgres.Chat, deviceRepo postgres.Device, cacheRep
 	return &ChatService{chat: chatRepo, device: deviceRepo, cache: cacheRepo}
 }
 
-func (s *ChatService) GetMissedMessages(ctx context.Context, userId int, deviceId string) ([]types.WsMessageOut, error) {
+func (s *ChatService) GetMissedMessages(ctx context.Context, userId int, deviceId string) ([]types.WsMessageWithTime, error) {
 	// get all the chats
 	chatIds, err := s.chat.GetAllChats(ctx, userId)
 	if err != nil {
-		return []types.WsMessageOut{}, err
+		return []types.WsMessageWithTime{}, err
 	}
 
 	var lastSeen time.Time
 	lastSeen, err = s.device.GetLastActiveTime(ctx, deviceId, userId)
 	if err != nil {
-		return []types.WsMessageOut{}, err
+		return []types.WsMessageWithTime{}, err
 	}
 
 	// get last seen time
@@ -54,7 +54,7 @@ func (s *ChatService) DeleteChat(ctx context.Context, chatId int) error {
 
 func (s *ChatService) GetChatMembers(ctx context.Context, chatId int) ([]int, error) {
 	members, err := s.cache.GetChatMembers(ctx, chatId)
-	if err != nil {
+	if err != nil || len(members) == 0 {
 		members, err = s.chat.GetChatMembers(ctx, chatId)
 		if err == nil {
 			err := s.cache.SetChatMembers(ctx, chatId, members)

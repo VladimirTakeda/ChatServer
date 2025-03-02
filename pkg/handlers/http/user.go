@@ -31,15 +31,7 @@ func (h *Handler) registerUser(c *gin.Context) {
 		return
 	}
 
-	userId, err := h.services.Register(c, registerUser.Nickname)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{})
-		return
-	}
-
-	deviceId := getHash(registerUser.DeviceInfo)
-
-	err = h.services.RegisterDevice(c, deviceId, *userId)
+	userId, deviceId, err := h.services.RegisterUser(c, registerUser.Nickname, getHash(registerUser.DeviceInfo))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{})
 		return

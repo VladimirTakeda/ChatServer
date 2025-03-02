@@ -34,22 +34,29 @@ func (h *Handler) WebSocketCreate(ctx *gin.Context) {
 
 	log.Printf("New User Connection with Id: %v and device %s", userTo, deviceId)
 
-	client := websocket2.NewClient(conn, userTo, deviceId)
+	client := websocket2.NewClient(conn, userTo, deviceId, h.services)
+
 	h.server.ClientIds[userTo] = client
 
 	h.server.Register <- client
 
+	// TODO: now user has subscription only for his private messages
+	// TODO: in future we need to add subscription for every group chat
+	subscriber, err := h.server.Services.CreateSubscription(ctx, "user:"+strconv.Itoa(userTo))
+	if err != nil {
+		log.Printf("error: %v", err)
+		return
+	}
+	log.Printf("Subscription %s created", "user:"+strconv.Itoa(userTo))
+
 	go func() {
 		messages, err := h.server.Services.GetMissedMessages(ctx, userTo, deviceId)
 		if err != nil {
-
 		}
 		client.WriteUpdates(messages)
-		go client.WriteMessage()
+		go client.ConsumeMessagesFromPubSub(ctx, subscriber)
 	}()
 
-	// get missed messages
-	// write messed messages to websocket
-
+	// send messages from websocket to PubSub
 	client.ReadMessage(h.server)
 }
