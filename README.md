@@ -1,37 +1,62 @@
-# Service ChatServer
+# Service: ChatServer
 
-## Description of functionality
-Main service features:
-- Register user (via login and password) (`http://localhost:8080/account`)
-- Authentication user via login and password the issuance of a JWT token (`http://localhost:8080/auth`)
+## Description of Functionality
+Main features of the service include:
+- **User Registration:** Users can register using a login and password. Endpoint: [`http://localhost:8080/account`].
+- **User Authentication:** Logging in with a login and password generates a JWT token. Endpoint: [`http://localhost:8080/auth`].
 
+---
 
-### Description of the service workflow
-1) New user creation
-   1) При регистрации пользователя по ручке http://localhost:8080/account, создаём юзера в таблице users
-2) Login search
-   1) При поиске по логину другого юзера и клине по нему - создаётся чат в таблице chats, в таблице  users - добавляем этот чат
-   одному и второму юзеру
-   2) ВАЖНО!! Если такой чат уже есть - то ничего не создаём. Для этого: когда мы создаём чат, мы идём в таблицу users и берём чаты у обоих юзеров
-   если есть общий чат - значит такой чат уже есть и мы возвращаем его. (TODO: добавить флаги для чатов как личные и групповые
-   и смотреть есть ли общий чат с флагом личный)
+## Description of the Service Workflow
 
+1) **Creating a New User**
+   - When registering a new user through the `http://localhost:8080/account` endpoint, the user's details are added to the `users` table.
+
+2) **Finding a User by Login**
+   - When searching for another user by their login and clicking on their profile:
+      1. A new chat entry is created in the `chats` table, and this chat is linked to both users within the `users` table.
+      2. **IMPORTANT:** If a chat between these two users already exists, no new chat is created. How this works:
+         - Upon attempting to create a chat, check the existing chats in the `users` table for both users.
+         - If a shared chat already exists, return the existing chat instead of creating a new one.
+
+     *(TODO: Add flags for chats to distinguish between personal chats and group chats. Additionally, check if a shared personal chat already exists by examining the personal chat flag.)*
+
+---
 
 ## TODO
-1) ~~Messages will be sent via websockets~~
-2) Authentication in a separate service
-3) How to work with the database? Whether to raise it in a separate service.
-4) Вебсокеты: как работать с одной и той же сессией когда у нас нескольно нод и распределённая память. Сохранять её в редис?
-5) Notification of events (new messages to offline users) via redis
-6) ~~Make real time messaging (without events with redis)~~
-7) ~~Link Websocket Connection to Client ID~~
-8) ~~When a new websocket session created block ws client channel for writing messages until the client recieve all the updates~~
-   1) Notifications via redis
-   ~~2) Message history via postgres~~
-9) ~~When user registered he sends device info, server generates hash from info and sends to client.
-After that client sends given deviceID with websocket session.~~
-10) Enable group chats (in progress)
 
-# Demo
+1) ~~Messages should be sent via WebSockets.~~
+2) Move the **Authentication** functionality to a separate service.
+3) Evaluate how to handle the database setup. Should the database be managed as a separate service?
+4) **WebSockets:** Address how to deal with shared sessions when multiple nodes are used and distributed memory is required. Should sessions be stored in Redis?
+5) Implement **event notifications for offline users** (e.g., new message notifications) using Redis.
+6) ~~Implement real-time messaging (without relying on Redis for events).~~
+7) ~~Link each WebSocket connection to a specific Client ID.~~
+8) ~~When a new WebSocket session is created, block the WebSocket client channel for writing messages until the client has received all pending updates.~~
+   - Notifications via Redis.
+   - ~~Message history stored using PostgreSQL.~~
+9) ~~During user registration, the client sends device information to the server. The server generates a hash based on this information and sends it back to the client. Afterward, the client includes the generated `deviceID` with every WebSocket session.~~
+10) Enable **group chats** (currently in progress).
 
-[![Demostration](https://img.youtube.com/vi/RP0IzubNi5w/0.jpg)](https://www.youtube.com/watch?v=RP0IzubNi5w)
+# Websocket usefull info
+1) https://www.reddit.com/r/kubernetes/comments/sssof0/k8_with_persistent_websocket_connections/
+2) https://cloud.google.com/kubernetes-engine/docs/concepts/ingress#support_for_websocket
+
+# How to do local deploy
+1) Install kuberctl 
+2) Install minikube
+3) Run 'make create-app-docker-image' it will create docker image of application
+4) Run 'make setup-minikube'
+5) Run 'make deploy-all'
+6) Add this lines to your host file (on Mac it's /etc/hosts)
+```
+127.0.0.1 myapp.local
+127.0.0.1 db.yourdomain.com
+127.0.0.1 cache.yourdomain.com
+```
+7) Run 'minikube tunnel'
+
+# To view logs 
+1) Run 'make kuber-gui' it will automatically open a kubernetes GUI in your browser
+2) On the top choose namespace 'enrollment'
+3) On the right side press on pods, you will see all the backend services, including 3 pods of application. Open each of them and on the right side press on logs. 

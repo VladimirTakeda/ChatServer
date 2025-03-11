@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pubsub
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pubsub
+  template:
+    metadata:
+      labels:
+        app: pubsub
+    spec:
+      containers:
+        - name: pubsub
+          image: redis:6.2-alpine
+          args: ["redis-server", "--requirepass", "$(REDIS_PASSWORD)"]
+          env:
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: REDIS_PASSWORD
+          ports:
+            - containerPort: 6379
+          volumeMounts:
+            - name: redis-pubsub-storage
+              mountPath: /data
+      volumes:
+        - name: redis-pubsub-storage
+          persistentVolumeClaim:
+            claimName: redis-pubsub-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pubsub
+spec:
+  selector:
+    app: pubsub
+  ports:
+    - port: 6380
+      targetPort: 6379

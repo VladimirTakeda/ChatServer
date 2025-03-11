@@ -4,6 +4,7 @@ import (
 	websocket2 "ChatServer/pkg/connection/websocket"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
+	"github.com/redis/go-redis/v9"
 	"log"
 	"net/http"
 	"strconv"
@@ -47,6 +48,13 @@ func (h *Handler) WebSocketCreate(ctx *gin.Context) {
 		log.Printf("error: %v", err)
 		return
 	}
+	defer func(subscriber *redis.PubSub) {
+		err := subscriber.Close()
+		if err != nil {
+			log.Printf("Failed to close pubsub")
+		}
+		log.Printf("PubSub subscription has been closed: %s", subscriber.String())
+	}(subscriber)
 	log.Printf("Subscription %s created", "user:"+strconv.Itoa(userTo))
 
 	go func() {
