@@ -131,6 +131,10 @@ setup-minikube:
 check-ports:
 	minikube service application -n enrollment
 
+.PHONY: run-tunnel
+run-tunnel:
+	minikube tunnel
+
 .PHONY: kuber-gui
 kuber-gui:
 	minikube dashboard

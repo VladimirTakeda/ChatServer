@@ -43,8 +43,8 @@ Main features of the service include:
 2) https://cloud.google.com/kubernetes-engine/docs/concepts/ingress#support_for_websocket
 
 # How to do local deploy
-1) Install kuberctl 
-2) Install minikube
+1) Install kuberctl : choco install kubernetes-cli, brew install kubectl
+2) Install minikube : choco install minikube or brew install minikube (don't forget to add it to PATH)
 3) Run 'make create-app-docker-image' it will create docker image of application
 4) Run 'make setup-minikube'
 5) Run 'make deploy-all'
