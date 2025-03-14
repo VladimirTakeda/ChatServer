@@ -53,7 +53,7 @@ type WsMessage struct {
 	ChatTo      int      `json:"chat_to_id"`
 }
 
-type WsMessageOut struct {
+type WsMessageWithTime struct {
 	WsMessage
 	Time time.Time `json:"time"`
 }

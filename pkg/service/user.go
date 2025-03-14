@@ -14,5 +14,9 @@ func NewUserService(repo postgres.User) *UserService {
 }
 
 func (s *UserService) Register(ctx context.Context, nickname string) (*int, error) {
-	return s.repo.Register(ctx, nickname)
+	userID, err := s.repo.Register(ctx, nickname)
+	if err != nil {
+		return nil, err
+	}
+	return userID, nil
 }

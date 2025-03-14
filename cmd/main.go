@@ -72,16 +72,29 @@ func main() {
 
 	err = postgres.RunMigrations("file://migrations", db)
 
-	redis, err := redis2.NewRedisDb(redis2.Config{
-		Host:     viper.GetString("redis.host"),
-		Port:     viper.GetString("redis.port"),
-		UserName: viper.GetString("redis.username"),
-		Password: viper.GetString("redis.password"),
-		DbNumber: viper.GetInt("redis.dbnumber"),
+	redisCache, err := redis2.NewRedisDb(redis2.Config{
+		Host:     viper.GetString("cache.host"),
+		Port:     viper.GetString("cache.port"),
+		UserName: viper.GetString("cache.username"),
+		Password: viper.GetString("cache.password"),
+		DbNumber: viper.GetInt("cache.dbnumber"),
 	})
 
 	if err != nil {
-		logrus.Fatalf("failed to open redis, %s", err.Error())
+		logrus.Fatalf("failed to open redis cache, %s", err.Error())
+		os.Exit(1)
+	}
+
+	redisPubSub, err := redis2.NewRedisDb(redis2.Config{
+		Host:     viper.GetString("pubsub.host"),
+		Port:     viper.GetString("pubsub.port"),
+		UserName: viper.GetString("pubsub.username"),
+		Password: viper.GetString("pubsub.password"),
+		DbNumber: viper.GetInt("pubsub.dbnumber"),
+	})
+
+	if err != nil {
+		logrus.Fatalf("failed to open redis pubsub, %s", err.Error())
 		os.Exit(1)
 	}
 
@@ -99,13 +112,14 @@ func main() {
 	s3Storage := minio2.NewS3Storage(minio)
 
 	repos := postgres.NewRepository(pool)
-	cache := redis2.NewCache(redis)
+	cache := redis2.NewCache(redisCache)
+	pubsub := redis2.NewPubSub(redisPubSub)
 
-	services := service.NewService(repos, cache, s3Storage)
+	services := service.NewService(repos, cache, pubsub, s3Storage)
 
 	httpHandlers := http.NewHandler(services)
 	serverHub := websocket2.NewServerHub(services)
-	wsHandlers := ws.NewHandler(serverHub)
+	wsHandlers := ws.NewHandler(serverHub, services)
 	go serverHub.Run()
 
 	gin.SetMode(gin.ReleaseMode)

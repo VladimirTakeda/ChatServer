@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+data:
+  POSTGRES_SERVER: "db"
+  POSTGRES_PORT: "5432"
+  POSTGRES_DB: "postgres"
+  POSTGRES_USER: "postgres"
+  REDIS_HOST: "cache"
+  REDIS_PORT: "6379"
+  REDIS_PUBSUB_HOST: "redis-pubsub"
+  REDIS_PUBSUB_PORT: "6380"

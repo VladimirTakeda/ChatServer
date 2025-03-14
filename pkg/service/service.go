@@ -7,12 +7,13 @@ import (
 	"ChatServer/pkg/types"
 	"context"
 	"github.com/minio/minio-go/v7"
+	redis2 "github.com/redis/go-redis/v9"
 	"io"
 	"time"
 )
 
 type Chat interface {
-	GetMissedMessages(ctx context.Context, userId int, deviceId string) ([]types.WsMessageOut, error)
+	GetMissedMessages(ctx context.Context, userId int, deviceId string) ([]types.WsMessageWithTime, error)
 	CreateChat(ctx context.Context, users []int) (*int, error)
 	DeleteChat(ctx context.Context, chatId int) error
 	GetChatMembers(ctx context.Context, chatId int) ([]int, error)
@@ -33,7 +34,8 @@ type Info interface {
 }
 
 type Message interface {
-	AddMessage(ctx context.Context, fromId, chatId int, text string, attachments []string) error
+	AddMessage(ctx context.Context, message types.WsMessageWithTime, userIDs []int) error
+	CreateSubscription(ctx context.Context, topicName string) (*redis2.PubSub, error)
 }
 
 type FileManager interface {
@@ -50,13 +52,25 @@ type Service struct {
 	FileManager
 }
 
-func NewService(repos *postgres.Repository, cache *redis.Cache, s3Storage *minio2.S3Storage) *Service {
+func NewService(repos *postgres.Repository, cache *redis.Cache, pubsub *redis.PubSub, s3Storage *minio2.S3Storage) *Service {
 	return &Service{
 		Chat:        NewChatService(repos.Chat, repos.Device, cache.Chat),
 		User:        NewUserService(repos.User),
 		Info:        NewInfoService(repos.Info),
-		Message:     NewMessageService(repos.Message),
+		Message:     NewMessageService(repos.Message, pubsub.MessageBus),
 		Device:      NewDeviceService(repos.Device),
 		FileManager: NewFileManagerService(s3Storage),
 	}
+}
+
+func (s *Service) RegisterUser(ctx context.Context, nickname, deviseHash string) (*int, string, error) {
+	userID, err := s.User.Register(ctx, nickname)
+	if err != nil {
+		return nil, "", err
+	}
+	err = s.Device.RegisterDevice(ctx, deviseHash, *userID)
+	if err != nil {
+		return nil, "", err
+	}
+	return userID, deviseHash, nil
 }

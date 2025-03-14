@@ -34,7 +34,11 @@ func (r *ChatCache) GetChatMembers(ctx context.Context, chatId int) ([]int, erro
 		memberIDs = append(memberIDs, memberID)
 	}
 
-	log.Printf("Load members from cache success")
+	if len(members) != 0 {
+		log.Printf("Load members from cache success")
+	} else {
+		log.Printf("Load members from cache failed")
+	}
 	return memberIDs, nil
 }
 

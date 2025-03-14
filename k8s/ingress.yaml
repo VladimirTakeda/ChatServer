@@ -1,0 +1,108 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: myapp-ingress
+  annotations:
+    # Choose one affinity method, not both
+    nginx.ingress.kubernetes.io/affinity: "cookie"
+    nginx.ingress.kubernetes.io/session-cookie-name: "myapp-session"
+    nginx.ingress.kubernetes.io/session-cookie-hash: "sha1"
+
+    # WebSocket specific annotations
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-buffer-size: "8k"
+    nginx.ingress.kubernetes.io/proxy-buffers-number: "4"
+
+    # Enable WebSocket with proper headers
+    nginx.ingress.kubernetes.io/enable-websocket: "true"
+    nginx.ingress.kubernetes.io/proxy-http-version: "1.1"
+    nginx.ingress.kubernetes.io/websocket-services: "application"
+    # Use these standard annotations instead of configuration-snippet
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+spec:
+  rules:
+    - host: myapp.local
+      http:
+        paths:
+          - path: /ws  # WebSocket specific path
+            pathType: Prefix
+            backend:
+              service:
+                name: application
+                port:
+                  number: 8080
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: application # Match your service name
+                port:
+                  number: 8080 # Match your service port
+    - host: db.yourdomain.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: db
+                port:
+                  number: 5432
+    - host: cache.yourdomain.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: cache
+                port:
+                  number: 6379
+    - host: pubsub.yourdomain.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: pubsub
+                port:
+                  number: 6380
+
+    - host: redis.gui.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: redisinsight-service
+                port:
+                  number: 8005
+
+    - host: postgres.gui.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: pgadmin-service
+                port:
+                  number: 80
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: tcp-services
+  namespace: enrollment
+data:
+  "5432": "enrollment/db:5432"
+  "6379": "enrollment/cache:6379"
+  "6380": "enrollment/pubsub:6379"
+  "8005": "enrollment/redisinsight-service:8005"
+  "80": "enrollment/pgadmin-service:8005"

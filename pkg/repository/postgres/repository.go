@@ -11,7 +11,7 @@ import (
 type Chat interface {
 	CreateChat(ctx context.Context, users []int) (*int, error)
 	DeleteChat(ctx context.Context, chatId int) error
-	GetMissedMessagesFromChats(ctx context.Context, userTo int, chatIds []int, lastSeen time.Time) ([]types.WsMessageOut, error)
+	GetMissedMessagesFromChats(ctx context.Context, userTo int, chatIds []int, lastSeen time.Time) ([]types.WsMessageWithTime, error)
 	GetAllChats(ctx context.Context, userId int) ([]int, error)
 	GetChatMembers(ctx context.Context, chatId int) ([]int, error)
 }

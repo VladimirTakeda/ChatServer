@@ -2,16 +2,19 @@ package ws
 
 import (
 	"ChatServer/pkg/connection/websocket"
+	"ChatServer/pkg/service"
 	"github.com/gin-gonic/gin"
 )
 
 type Handler struct {
-	server *websocket.ServerHub
+	server   *websocket.ServerHub
+	services *service.Service
 }
 
-func NewHandler(s *websocket.ServerHub) *Handler {
+func NewHandler(s *websocket.ServerHub, services *service.Service) *Handler {
 	return &Handler{
-		server: s,
+		server:   s,
+		services: services,
 	}
 }
 
