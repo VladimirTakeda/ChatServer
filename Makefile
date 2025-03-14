@@ -77,10 +77,13 @@ flush-all-kuber: flush-cache-kuber flush-pubsub-kuber flush-postgres-kuber
 
 
  #(this builds image direcly in minikube) eval $$(minikube -p minikube docker-env)
-.PHONY: create-app-docker-image
+ifeq ($(OS),Windows_NT)
 create-app-docker-image:
-	eval $$(minikube -p minikube docker-env) && \
-	docker build -t myapp:latest -f ./docker/backend_docker/Dockerfile .
+	powershell -Command "minikube -p minikube docker-env | Invoke-Expression; docker build -t myapp:latest -f ./docker/backend_docker/Dockerfile ."
+else
+create-app-docker-image:
+	eval $$(minikube -p minikube docker-env) && docker build -t myapp:latest -f ./docker/backend_docker/Dockerfile .
+endif
 
 .PHONY: verify-image
 verify-image:
