@@ -50,9 +50,12 @@ Main features of the service include:
 5) Run 'make deploy-all'
 6) Add this lines to your host file (on Mac it's /etc/hosts)
 ```
-127.0.0.1 myapp.local
+127.0.0.1 myapp.local  
 127.0.0.1 db.yourdomain.com
 127.0.0.1 cache.yourdomain.com
+127.0.0.1 pubsub.yourdomain.com
+127.0.0.1 redis.gui.com
+127.0.0.1 postgres.gui.com
 ```
 7) Run 'minikube tunnel'
 
