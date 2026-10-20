@@ -28,7 +28,7 @@ services:
       - enrollment
 
   minio-server:
-    image: minio/minio
+    image: alpine/minio:latest-release
     ports:
       - "9000:9000"
       - "9001:9001"
