@@ -123,10 +123,13 @@ check-kuber-status:
 
 .PHONY: setup-minikube
 setup-minikube:
-	minikube stop
+	# leading '-' ignores exit code: no-op if no profile exists yet
+	-minikube stop
 	minikube start --cpus=6 --memory=12288 --driver=docker
 	minikube status
 	minikube addons enable ingress
+	# wait for the admission webhook pod — otherwise `deploy-all` races it and ingress.yaml fails
+	kubectl wait --namespace ingress-nginx --for=condition=ready pod --selector=app.kubernetes.io/component=controller --timeout=180s
 	minikube addons list
 	minikube status
 
