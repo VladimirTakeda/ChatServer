@@ -55,22 +55,24 @@ for _ in $(seq 1 60); do
 done
 kubectl get nodes
 
-log "Installing Helm"
+log "Installing Helm (official installer)"
 if ! command -v helm >/dev/null 2>&1; then
-  curl -fsSL https://baltocdn.com/helm/signing.asc | gpg --dearmor -o /usr/share/keyrings/helm.gpg
-  echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/helm.gpg] https://baltocdn.com/helm/stable/debian/ all main" \
-    > /etc/apt/sources.list.d/helm-stable-debian.list
-  apt-get update -y
-  apt-get install -y helm
+  curl -fsSL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 -o /tmp/get-helm-3.sh
+  chmod +x /tmp/get-helm-3.sh
+  /tmp/get-helm-3.sh
+  rm -f /tmp/get-helm-3.sh
 fi
+helm version
 
-log "Installing ingress-nginx"
+log "Installing ingress-nginx (hostNetwork mode — single-node VPS)"
 helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx >/dev/null 2>&1 || true
 helm repo update >/dev/null
 helm upgrade --install ingress-nginx ingress-nginx/ingress-nginx \
   --namespace ingress-nginx --create-namespace \
-  --set controller.service.type=LoadBalancer \
-  --set controller.service.externalTrafficPolicy=Local \
+  --set controller.hostNetwork=true \
+  --set controller.dnsPolicy=ClusterFirstWithHostNet \
+  --set controller.kind=DaemonSet \
+  --set controller.service.type=ClusterIP \
   --set controller.ingressClassResource.default=true \
   --wait --timeout 5m
 
