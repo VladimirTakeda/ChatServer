@@ -7,7 +7,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository_owner }}/chatserver
+  IMAGE_NAME: vladimirtakeda/chatserver
   NAMESPACE: enrollment
   DEPLOYMENT: application
 
