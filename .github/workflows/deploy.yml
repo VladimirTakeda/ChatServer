@@ -74,7 +74,7 @@ jobs:
           script: |
             set -euo pipefail
             export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
-            IMAGE="${REGISTRY}/${IMAGE_NAME}:sha-${GITHUB_SHA::12}"
+            IMAGE="${REGISTRY}/${IMAGE_NAME}:sha-${GITHUB_SHA::7}"
             echo "Rolling ${DEPLOYMENT} to ${IMAGE}"
             kubectl -n "${NAMESPACE}" set image "deployment/${DEPLOYMENT}" "${DEPLOYMENT}=${IMAGE}"
             kubectl -n "${NAMESPACE}" rollout status "deployment/${DEPLOYMENT}" --timeout=5m
