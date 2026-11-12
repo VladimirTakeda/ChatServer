@@ -14,8 +14,8 @@ spec:
     spec:
       containers:
         - name: application
-          image: myapp:latest  # Changed this line
-          imagePullPolicy: Never  # Should be never here
+          image: ghcr.io/vladimirtakeda/chatserver:latest
+          imagePullPolicy: Always
           envFrom:
             - configMapRef:
                 name: app-config

@@ -139,7 +139,9 @@ check-ports:
 
 .PHONY: run-tunnel
 run-tunnel:
-	minikube tunnel
+	# prime sudo first — minikube tunnel's internal sudo call silently fails
+	# under `make` because stdin isn't a usable TTY for its password prompt
+	sudo -v && minikube tunnel
 
 .PHONY: kuber-gui
 kuber-gui:

@@ -57,7 +57,9 @@ Main features of the service include:
 127.0.0.1 redis.gui.com
 127.0.0.1 postgres.gui.com
 ```
-7) Run 'minikube tunnel'
+7) Run `minikube tunnel` **directly in a terminal** (or `make run-tunnel`). It will prompt for your macOS password to bind privileged ports 80/443. Leave it running.
+
+   > **Troubleshooting — `Connection refused` on `http://myapp.local`:** this almost always means the tunnel didn't get sudo and nothing is bound to port 80. Verify with `lsof -nP -iTCP:80 -sTCP:LISTEN` — if empty, the tunnel isn't bound. Run `minikube tunnel` in a terminal (not backgrounded, not via a wrapper that detaches stdin) and make sure you see and answer the `Password:` prompt. The provided `make run-tunnel` target runs `sudo -v` first to prime the sudo cache so the password prompt is visible under `make`.
 
 # To view logs 
 1) Run 'make kuber-gui' it will automatically open a kubernetes GUI in your browser
